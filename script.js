@@ -4,7 +4,7 @@ let currentSong = null;
 
 async function getsongs(folder) {
   currfolder = folder;
-  let a = await fetch(`https://praneet7871.github.io/Music-player/${folder}/`);
+  let a = await fetch(`/${folder}/`);
   let response = await a.text();
   let div = document.createElement("div");
   div.innerHTML = response;
@@ -30,7 +30,8 @@ function playmusic(track, pause = false) {
     return `${min < 10 ? "0" : ""}${min}:${sec < 10 ? "0" : ""}${sec}`;
   }
 
-  var audio = new Audio(`https://praneet7871.github.io/Music-player/${currfolder}/${track}`);
+  var audio = new Audio(`/${currfolder}/${track}`);
+  // var audio = new Audio(`https://yourusername.github.io/yourrepository/${currfolder}/${track}`);
   currentSong = audio;
   audio.play();
   
@@ -82,7 +83,7 @@ function updateSongListUI(songs) {
       let songFileName = songName.replaceAll(" ", "%20") + ".mp3";
       console.log(songName);
       playmusic(songFileName);
-      document.getElementById("play").src = "https://praneet7871.github.io/Music-player/assets/pause.svg";
+      document.getElementById("play").src = "/assets/pause.svg";
     });
   });
 }
@@ -94,10 +95,10 @@ async function main() {
   document.getElementById("play").addEventListener("click", () => {
     if (currentSong.paused) {
       currentSong.play();
-      document.getElementById("play").src = "https://praneet7871.github.io/Music-player/assets/pause.svg";
+      document.getElementById("play").src = "/assets/pause.svg";
     } else {
       currentSong.pause();
-      document.getElementById("play").src = "https://praneet7871.github.io/Music-player/assets/play.svg";
+      document.getElementById("play").src = "/assets/play.svg";
     }
   });
 
