@@ -4,18 +4,20 @@ let currentSong = null;
 
 async function getsongs(folder) {
   currfolder = folder;
-  let a = await fetch(`https://github.com/Praneet7871/Music-player/tree/main/${folder}/`);
-  let response = await a.text();
-  let div = document.createElement("div");
-  div.innerHTML = response;
+  const repo = "Praneet7871/Music-player";
+  const branch = "main";
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${folder}?ref=${branch}`;
+
+  let response = await fetch(apiUrl);
+  let files = await response.json();
+  
   let fetchedSongs = [];
-  let as = div.getElementsByTagName("a");
-  for (let index = 0; index < as.length; index++) {
-    const element = as[index];
-    if (element.href.endsWith("mp3")) {
-      fetchedSongs.push(decodeURIComponent(element.href.split(`/${folder}/`)[1]));
+  files.forEach(file => {
+    if (file.name.endsWith(".mp3")) {
+      fetchedSongs.push(file.name);
     }
-  }
+  });
+  
   return fetchedSongs;
 }
 
@@ -30,12 +32,10 @@ function playmusic(track, pause = false) {
     return `${min < 10 ? "0" : ""}${min}:${sec < 10 ? "0" : ""}${sec}`;
   }
 
-  var audio = new Audio(`https://github.com/Praneet7871/Music-player/tree/main/${currfolder}/${track}`);
-  // var audio = new Audio(`https://yourusername.github.io/yourrepository/${currfolder}/${track}`);
+  var audio = new Audio(`https://raw.githubusercontent.com/Praneet7871/Music-player/main/${currfolder}/${track}`);
   currentSong = audio;
   audio.play();
   
-  // Update the song title
   let songName = track.replaceAll("%20", " ").replace(".mp3", "");
   document.querySelector(".songinfo").textContent = songName;
 
@@ -45,9 +45,7 @@ function playmusic(track, pause = false) {
     let formattedDuration = formatTime(duration);
     let formattedCurrentTime = formatTime(ctime);
 
-    console.log(duration, audio.currentSrc, ctime);
-    document.querySelector(".songtime").textContent =
-      formattedCurrentTime + "/" + formattedDuration;
+    document.querySelector(".songtime").textContent = formattedCurrentTime + "/" + formattedDuration;
     let circle = document.querySelector(".circle");
     circle.style.left = (100 * ctime) / duration + "%";
     let progressbar = document.querySelector(".progressbar");
@@ -76,12 +74,10 @@ function updateSongListUI(songs) {
       </li>`;
   }
 
-  // Add click event listeners to the new song list items
   Array.from(songUL.getElementsByTagName("li")).forEach((e) => {
     e.addEventListener("click", (element) => {
       let songName = e.querySelector(".info").firstElementChild.innerHTML;
       let songFileName = songName.replaceAll(" ", "%20") + ".mp3";
-      console.log(songName);
       playmusic(songFileName);
       document.getElementById("play").src = "/assets/pause.svg";
     });
@@ -103,7 +99,6 @@ async function main() {
   });
 
   document.getElementById("next").addEventListener("click", () => {
-    console.log("next");
     let index = songs.indexOf(decodeURIComponent(currentSong.src.split("/").slice(-1)[0]));
     if (index + 1 < songs.length) {
       playmusic(songs[index + 1]);
@@ -111,7 +106,6 @@ async function main() {
   });
 
   document.getElementById("previous").addEventListener("click", () => {
-    console.log("previous");
     let index = songs.indexOf(decodeURIComponent(currentSong.src.split("/").slice(-1)[0]));
     if (index - 1 >= 0) {
       playmusic(songs[index - 1]);
@@ -121,18 +115,19 @@ async function main() {
   Array.from(document.getElementsByClassName("card")).forEach(e => {
     e.addEventListener("click", async item => {
       let folder = item.currentTarget.dataset.folder;
-      console.log(item, item.currentTarget.dataset);
-      songs = await getsongs(`https://github.com/Praneet7871/Music-player/tree/main/songs/${folder}`);
+      songs = await getsongs(`songs/${folder}`);
       updateSongListUI(songs);
       document.querySelector(".left").style.left="0"
     });
   });
+
   document.querySelector(".menu").addEventListener("click",()=>{
-    document.querySelector(".left").style.left="0"
-  })
+    document.querySelector(".left").style.left="0";
+  });
+
   document.querySelector(".cross").addEventListener("click",()=>{
-    document.querySelector(".left").style.left="-100%"
-  })
+    document.querySelector(".left").style.left="-100%";
+  });
 }
 
 main();
